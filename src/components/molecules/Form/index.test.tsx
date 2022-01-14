@@ -12,7 +12,7 @@ const {
   InputInvalidForm3,
   InputValidForm,
   LoggedIn,
-} = composeStories(stories) as any // TODO: 型エラー解決できず。 beta 版だから一旦 any で回避
+} = composeStories(stories)
 
 describe("Form", () => {
   describe("focus", () => {
@@ -20,9 +20,9 @@ describe("Form", () => {
       { Story: ClickIdLabel, target: "id" },
       { Story: ClickPasswordLabel, target: "password" },
     ] as const)("$target label をクリックしたら $target input に focus があたる", async ({ Story , target}) => {
-      render(<Story />)
+      const { container } = render(<Story />)
 
-      await Story.play()
+      await Story.play({ canvasElement: container })
       expect(screen.getByPlaceholderText(target)).toHaveFocus()
     })
   })
@@ -39,24 +39,25 @@ describe("Form", () => {
       ["pw", InputInvalidForm2],
       ["id, password", InputInvalidForm3],
     ] as const)("%s の入力値が正しくない場合", async (_, Story) => {
-      render(<Story />)
+      const { container } = render(<Story />)
 
-      await Story.play()
+      await Story.play({ canvasElement: container })
       expect(screen.getByText("ログイン")).toBeDisabled()
     })
   })
 
   it("id, password の入力値が正しい場合、ログインボタンは活性", async () => {
-    render(<InputValidForm />)
+    const { container } = render(<InputValidForm />)
 
-    await InputValidForm.play()
+    await InputValidForm.play({ canvasElement: container })
     expect(screen.getByText("ログイン")).toBeEnabled()
   })
 
   it("form が invalid 時、露軍ボタンを押すとログイン済みになる", async () => {
     const mounted = render(<LoggedIn />)
+    const { container } = mounted
 
-    await LoggedIn.play()
+    await LoggedIn.play({ canvasElement: container })
     expect(mounted.container).toHaveTextContent("ログイン済み")
   })
 })
